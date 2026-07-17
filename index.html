@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Min Budget">
+    <meta name="theme-color" content="#0b0e14">
+    <meta name="description" content="En smart budget app för att spåra din ekonomi">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23d4a373' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='100' fill='%23fff'>💰</text></svg>">
+    <title>💰 Min Budget</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0b0e14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        .app-container { max-width: 420px; width: 100%; background: linear-gradient(145deg, #141a26, #1a212f); border-radius: 40px; padding: 24px 20px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,215,150,0.06); }
+        .greeting-section { background: rgba(212,163,115,0.08); border-radius: 28px; padding: 18px 20px; margin-bottom: 20px; animation: fadeIn 0.6s ease; border: 1px solid rgba(255,215,150,0.06); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+        .greeting-row { display: flex; align-items: center; gap: 14px; }
+        .greeting-emoji { font-size: 38px; animation: pulse 2.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-3deg); } }
+        .greeting-text { flex: 1; }
+        .greeting-text .time-greeting { color: #f0e6d8; font-size: 22px; font-weight: 600; }
+        .greeting-text .motivation { color: #d4a373; font-size: 15px; margin-top: 2px; }
+        .greeting-text .current-time { color: #7a8799; font-size: 13px; margin-top: 2px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { color: #f0e6d8; font-weight: 600; font-size: 22px; }
+        .header h1 span { color: #d4a373; }
+        .reset-btn { background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.15); color: #ff8a7a; padding: 8px 16px; border-radius: 30px; font-size: 13px; cursor: pointer; }
+        .balance-card { background: linear-gradient(135deg, #1f2a3f, #16202e); border-radius: 28px; padding: 24px 20px; margin-bottom: 24px; border: 1px solid rgba(255,215,150,0.06); }
+        .balance-label { color: #9aa8b9; font-size: 14px; text-transform: uppercase; }
+        .balance-amount { color: #f5efe8; font-size: 44px; font-weight: 700; margin: 6px 0 0; transition: all 0.3s ease; }
+        .balance-amount.negative { color: #ff7a6b; }
+        .balance-row { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .balance-row-item { text-align: center; }
+        .balance-row-item .label { color: #7a8799; font-size: 12px; text-transform: uppercase; }
+        .balance-row-item .value { color: #e8dfd4; font-size: 18px; font-weight: 600; margin-top: 2px; }
+        .balance-row-item .value.income { color: #6fcf97; }
+        .balance-row-item .value.expense { color: #f28b82; }
+        .form-section { background: rgba(255,255,255,0.02); border-radius: 24px; padding: 18px 16px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.04); }
+        .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 100px; }
+        .form-group label { display: block; color: #8d9aad; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #f0e8e0; font-size: 15px; outline: none; -webkit-appearance: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #d4a373; background: rgba(255,255,255,0.09); }
+        .form-group input::placeholder { color: #556072; }
+        .form-group select option { background: #1a212f; color: #f0e8e0; }
+        .add-btn { background: linear-gradient(135deg, #d4a373, #b8875a); border: none; color: #0b0e14; font-weight: 700; font-size: 15px; padding: 0 24px; border-radius: 30px; cursor: pointer; min-width: 80px; height: 44px; align-self: flex-end; -webkit-appearance: none; }
+        .list-header { display: flex; justify-content: space-between; color: #7a8799; font-size: 12px; text-transform: uppercase; padding: 0 4px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .transaction-list { list-style: none; margin-top: 6px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+        .transaction-list::-webkit-scrollbar { width: 4px; }
+        .transaction-list::-webkit-scrollbar-thumb { background: #2f3a4e; border-radius: 10px; }
+        .transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; margin-bottom: 6px; background: rgba(255,255,255,0.02); border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: slideIn 0.35s ease forwards; opacity: 0; transform: translateY(-10px); }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+        .transaction-item .info .title { color: #f0e8e0; font-size: 15px; font-weight: 500; }
+        .transaction-item .info .category { color: #7a8799; font-size: 12px; }
+        .transaction-item .amount { font-weight: 600; font-size: 17px; }
+        .transaction-item .amount.income { color: #6fcf97; }
+        .transaction-item .amount.expense { color: #f28b82; }
+        .transaction-item .delete-btn { background: none; border: none; color: #556072; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 30px; opacity: 0.4; -webkit-appearance: none; }
+        .transaction-item:hover .delete-btn { opacity: 1; }
+        .transaction-item .delete-btn:hover { color: #ff7a6b; background: rgba(255,70,70,0.1); }
+        .empty-state { text-align: center; color: #556072; padding: 40px 0 20px; font-size: 14px; }
+        .empty-state span { display: block; font-size: 32px; margin-bottom: 10px; }
+        @media(max-width:400px){ .form-row { flex-direction: column; } .form-group { min-width: 100%; } .add-btn { width: 100%; height: 48px; margin-top: 6px; } .balance-amount { font-size: 34px; } .app-container { padding: 16px; } }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="greeting-section">
+        <div class="greeting-row">
+            <div class="greeting-emoji" id="greetingEmoji">🌅</div>
+            <div class="greeting-text">
+                <div class="time-greeting" id="greetingText">God Morgon!</div>
+                <div class="motivation" id="motivationText">Börja dagen med mening 🌟</div>
+                <div class="current-time" id="currentTimeDisplay">--:-- --</div>
+            </div>
+        </div>
+    </div>
+    <div class="header">
+        <h1>💰 <span>Min</span>Budget</h1>
+        <button class="reset-btn" id="resetAllBtn">✕ Återställ</button>
+    </div>
+    <div class="balance-card">
+        <div class="balance-label">Totalt Saldo</div>
+        <div class="balance-amount" id="balanceDisplay">0 kr</div>
+        <div class="balance-row">
+            <div class="balance-row-item">
+                <div class="label">Inkomst</div>
+                <div class="value income" id="totalIncome">0 kr</div>
+            </div>
+            <div class="balance-row-item">
+                <div class="label">Utgifter</div>
+                <div class="value expense" id="totalExpense">0 kr</div>
+            </div>
+        </div>
+    </div>
+    <div class="form-section">
+        <div class="form-row">
+            <div class="form-group" style="flex:2;">
+                <label>Beskrivning</label>
+                <input type="text" id="descInput" placeholder="T.ex. Kaffe" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Belopp</label>
+                <input type="number" id="amountInput" placeholder="0.00" step="0.01" min="0" />
+            </div>
+            <div class="form-group" style="flex:1.2;">
+                <label>Typ</label>
+                <select id="typeSelect">
+                    <option value="income">💰 Inkomst</option>
+                    <option value="expense">💸 Utgift</option>
+                </select>
+            </div>
+            <button class="add-btn" id="addBtn">+ Lägg till</button>
+        </div>
+    </div>
+    <div class="list-header">
+        <span>Senaste transaktioner</span>
+        <span id="txCount">0 poster</span>
+    </div>
+    <ul class="transaction-list" id="transactionList">
+        <li class="empty-state"><span>📭</span> Inga transaktioner än</li>
+    </ul>
+</div>
+<script>
+(function() {
+    let transactions = [];
+    let nextId = 1;
+    function updateGreeting() {
+        const now = new Date();
+        const h = now.getHours();
+        const m = now.getMinutes();
+        document.getElementById('currentTimeDisplay').textContent = 
+            `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+        const e = document.getElementById('greetingEmoji');
+        const g = document.getElementById('greetingText');
+        const mot = document.getElementById('motivationText');
+        let msgs = [];
+        if (h >= 5 && h < 12) {
+            e.textContent = '🌅';
+            g.textContent = 'God Morgon! 🌅';
+            msgs = ['Börja dagen med mening 🌟','Vakna och stråla! ☀️','Idag är full av möjligheter ✨','Var den energi du vill ha 💫','Små steg leder till stora vinster 🏆'];
+        } else if (h >= 12 && h < 17) {
+            e.textContent = '☀️';
+            g.textContent = 'God Eftermiddag! ☀️';
+            msgs = ['Fortsätt framåt 💪','Du gör ett bra jobb! 🌟','Håll fokus, var gyllene ✨','Framsteg över perfektion 📈','Få resten av dagen att räknas 🎯'];
+        } else if (h >= 17 && h < 21) {
+            e.textContent = '🌆';
+            g.textContent = 'God Kväll! 🌆';
+            msgs = ['Varva ner med tacksamhet 🙏','Du klarade dagen 💪','Reflektera över dina framgångar 🏅','Vila och ladda 🌙','Imorgon är en ny möjlighet 🌟'];
+        } else {
+            e.textContent = '🌙';
+            g.textContent = 'God Natt! 🌙';
+            msgs = ['Vila gott, dröm stort 💫','Du förtjänar en lugn natt 🛌','Stjärnorna lyser för dig ✨','Imorgon ger nytt hopp 🌅','Sov gott, mästare 🏆'];
+        }
+        mot.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    }
+    updateGreeting();
+    setInterval(updateGreeting, 60000);
+    function formatCurrency(a) { 
+        return Math.round(a).toLocaleString('sv-SE') + ' kr';
+    }
+    function loadData() {
+        try {
+            const d = localStorage.getItem('mybudget_data_se');
+            if (d) {
+                const p = JSON.parse(d);
+                transactions = p.transactions || [];
+                nextId = p.nextId || 1;
+            }
+        } catch(e) {}
+    }
+    function saveData() {
+        try {
+            localStorage.setItem('mybudget_data_se', JSON.stringify({transactions, nextId}));
+        } catch(e) {}
+    }
+    function render() {
+        let totalIncome = 0, totalExpense = 0;
+        for (let tx of transactions) {
+            if (tx.type === 'income') totalIncome += tx.amount;
+            else totalExpense += tx.amount;
+        }
+        const balance = totalIncome - totalExpense;
+        const b = document.getElementById('balanceDisplay');
+        b.textContent = formatCurrency(balance);
+        b.classList.toggle('negative', balance < 0);
+        document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+        document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+        document.getElementById('txCount').textContent = transactions.length + ' poster';
+        const list = document.getElementById('transactionList');
+        if (transactions.length === 0) {
+            list.innerHTML = '<li class="empty-state"><span>📭</span> Inga transaktioner än</li>';
+            return;
+        }
+        const sorted = [...transactions].sort((a,b) => b.id - a.id);
+        let html = '';
+        for (let tx of sorted) {
+            const sign = tx.type === 'income' ? '+' : '−';
+            const cls = tx.type === 'income' ? 'income' : 'expense';
+            const cat = tx.type === 'income' ? 'Inkomst' : 'Utgift';
+            const amt = Math.round(tx.amount).toLocaleString('sv-SE') + ' kr';
+            html += `<li class="transaction-item" data-id="${tx.id}">
+                <div class="info">
+                    <span class="title">${tx.description}</span>
+                    <span class="category">${cat}</span>
+                </div>
+                <div class="amount ${cls}">${sign} ${amt}</div>
+                <button class="delete-btn" data-id="${tx.id}">✕</button>
+            </li>`;
+        }
+        list.innerHTML = html;
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = parseInt(this.dataset.id);
+                transactions = transactions.filter(tx => tx.id !== id);
+                saveData();
+                render();
+            });
+        });
+    }
+    function addTransaction(desc, amount, type) {
+        if (!desc.trim()) { alert('Ange en beskrivning.'); return false; }
+        if (isNaN(amount) || amount <= 0) { alert('Ange ett giltigt belopp > 0.'); return false; }
+        const tx = { id: nextId++, description: desc.trim(), amount, type, date: new Date().toISOString() };
+        transactions.push(tx);
+        saveData();
+        render();
+        return true;
+    }
+    document.getElementById('addBtn').addEventListener('click', function() {
+        const desc = document.getElementById('descInput').value.trim();
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        const type = document.getElementById('typeSelect').value;
+        if (addTransaction(desc, amount, type)) {
+            document.getElementById('descInput').value = '';
+            document.getElementById('amountInput').value = '';
+            document.getElementById('descInput').focus();
+        }
+    });
+    document.getElementById('descInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); });
+    document.getElementById('amountInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); });
+    document.getElementById('resetAllBtn').addEventListener('click', function() {
+        if (transactions.length === 0) return;
+        if (confirm('Ta bort alla transaktioner?')) {
+            transactions = [];
+            nextId = 1;
+            saveData();
+            render();
+        }
+    });
+    loadData();
+    render();
+    if (transactions.length === 0) {
+        const samples = [
+            { desc: 'Lön', amount: 25000, type: 'income' },
+            { desc: 'Matvaror', amount: 850, type: 'expense' },
+            { desc: 'Kaffe', amount: 45, type: 'expense' },
+            { desc: 'Frilans', amount: 3200, type: 'income' },
+            { desc: 'Restaurang', amount: 380, type: 'expense' }
+        ];
+        for (let s of samples) {
+            addTransaction(s.desc, s.amount, s.type);
+        }
+        nextId = transactions.length + 1;
+        saveData();
+        render();
+    }
+})();
+</script>
+</body>
+</html>
