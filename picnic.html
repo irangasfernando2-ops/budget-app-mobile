@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Picknick">
+    <meta name="theme-color" content="#0b0e14">
+    <title>🧺 Picknick Västra Farlunda</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0b0e14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+        .app { max-width: 420px; width: 100%; background: linear-gradient(145deg, #141a26, #1a212f); border-radius: 40px; padding: 24px 20px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,215,150,0.06); align-self: flex-start; }
+        h1 { color: #f0e6d8; font-size: 22px; font-weight: 600; }
+        h1 span { color: #d4a373; }
+        .sub { color: #7a8799; font-size: 13px; margin: 4px 0 18px; }
+        .card { background: rgba(212,163,115,0.08); border: 1px solid rgba(255,215,150,0.06); border-radius: 24px; padding: 16px; margin-bottom: 20px; }
+        .card .label { color: #9aa8b9; font-size: 12px; text-transform: uppercase; }
+        .card .dest { color: #f5efe8; font-size: 20px; font-weight: 700; margin: 4px 0 10px; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .group { flex: 1; min-width: 100px; margin-bottom: 10px; }
+        .group label { display: block; color: #8d9aad; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+        input { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; color: #f0e8e0; font-size: 16px; outline: none; -webkit-appearance: none; }
+        input:focus { border-color: #d4a373; }
+        input::placeholder { color: #556072; }
+        .form { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 24px; padding: 16px; margin-bottom: 20px; }
+        .btn { background: linear-gradient(135deg, #d4a373, #b8875a); border: none; color: #0b0e14; font-weight: 700; font-size: 15px; height: 44px; padding: 0 20px; border-radius: 30px; cursor: pointer; -webkit-appearance: none; }
+        .btn.full { width: 100%; }
+        .btn.ghost { background: rgba(255,255,255,0.06); color: #e8dfd4; font-weight: 600; height: 36px; font-size: 13px; padding: 0 14px; }
+        .pickup { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 20px; padding: 14px; margin-bottom: 12px; }
+        .pickup-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .pickup .name { color: #f0e8e0; font-size: 16px; font-weight: 600; }
+        .pickup .meta { color: #7a8799; font-size: 13px; margin-top: 2px; }
+        .time { color: #d4a373; font-weight: 700; font-size: 18px; white-space: nowrap; }
+        .seats { color: #6fcf97; font-size: 13px; margin-top: 8px; }
+        .seats.full { color: #f28b82; }
+        .people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .chip { background: rgba(212,163,115,0.15); color: #f0e6d8; font-size: 13px; padding: 4px 10px; border-radius: 20px; border: none; cursor: pointer; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+        .actions input { flex: 1; min-width: 110px; padding: 7px 12px; font-size: 14px; }
+        .del { background: none; border: none; color: #556072; font-size: 18px; cursor: pointer; }
+        .empty { color: #556072; text-align: center; padding: 20px 0; font-size: 14px; }
+        h2 { color: #9aa8b9; font-size: 12px; text-transform: uppercase; margin: 0 4px 10px; }
+        .toast { color: #6fcf97; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+        a.link { color: #d4a373; text-decoration: none; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>🧺 <span>Picknick</span></h1>
+    <p class="sub">Samlingsplatser &amp; samåkning</p>
+
+    <div class="card">
+        <div class="label">Mål</div>
+        <div class="dest">Västra Farlunda, Skövde</div>
+        <div class="row">
+            <div class="group"><label>Datum</label><input id="date" type="date"></div>
+            <div class="group"><label>Vi ses där kl.</label><input id="arrive" type="time"></div>
+        </div>
+        <a class="link" id="destMap" target="_blank" rel="noopener">📍 Öppna målet i kartor</a>
+    </div>
+
+    <h2>Lägg till samlingsplats</h2>
+    <form class="form" id="form">
+        <div class="row">
+            <div class="group"><label>Plats</label><input id="place" placeholder="T.ex. Resecentrum" required></div>
+            <div class="group"><label>Tid</label><input id="time" type="time" required></div>
+        </div>
+        <div class="row">
+            <div class="group"><label>Förare</label><input id="driver" placeholder="Namn" required></div>
+            <div class="group"><label>Lediga platser</label><input id="seats" type="number" min="0" max="8" value="3" inputmode="numeric"></div>
+        </div>
+        <button class="btn full" type="submit">Lägg till</button>
+    </form>
+
+    <h2>Samlingsplatser</h2>
+    <div id="list"></div>
+
+    <button class="btn full" id="share">📤 Dela med gruppen</button>
+    <div class="toast" id="toast"></div>
+</div>
+
+<script>
+    const DEST = 'Västra Farlunda, Skövde';
+    const KEY = 'picnic-v1';
+    let state = { date: '', arrive: '', pickups: [] };
+    try { state = Object.assign(state, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+
+    const $ = id => document.getElementById(id);
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+    const mapUrl = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    $('destMap').href = mapUrl(DEST);
+    $('date').value = state.date;
+    $('arrive').value = state.arrive;
+    $('date').onchange = e => { state.date = e.target.value; save(); };
+    $('arrive').onchange = e => { state.arrive = e.target.value; save(); };
+
+    function render() {
+        const list = $('list');
+        if (!state.pickups.length) { list.innerHTML = '<div class="empty">Inga samlingsplatser än</div>'; return; }
+        const sorted = state.pickups.map((p, i) => ({ p, i })).sort((a, b) => a.p.time.localeCompare(b.p.time));
+        list.innerHTML = sorted.map(({ p, i }) => {
+            const left = p.seats - p.people.length;
+            return `<div class="pickup">
+                <div class="pickup-top">
+                    <div><div class="name">${esc(p.place)}</div>
+                    <div class="meta">🚗 ${esc(p.driver)} · <a class="link" target="_blank" rel="noopener" href="${mapUrl(p.place + ' Skövde')}">karta</a></div></div>
+                    <div><div class="time">${esc(p.time)}</div></div>
+                    <button class="del" data-del="${i}" aria-label="Ta bort">✕</button>
+                </div>
+                <div class="seats ${left <= 0 ? 'full' : ''}">${left > 0 ? left + ' lediga platser' : 'Bilen är full'}</div>
+                <div class="people">${p.people.map((n, j) => `<button class="chip" data-rm="${i}:${j}" title="Ta bort">${esc(n)} ✕</button>`).join('')}</div>
+                ${left > 0 ? `<div class="actions"><input data-name="${i}" placeholder="Namn på passagerare"><button class="btn ghost" data-add="${i}">Boka plats</button></div>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    $('form').onsubmit = e => {
+        e.preventDefault();
+        state.pickups.push({
+            place: $('place').value.trim(), time: $('time').value, driver: $('driver').value.trim(),
+            seats: Math.max(0, parseInt($('seats').value, 10) || 0), people: []
+        });
+        save(); render(); e.target.reset(); $('seats').value = 3;
+    };
+
+    $('list').onclick = e => {
+        const t = e.target;
+        if (t.dataset.del !== undefined) { if (confirm('Ta bort samlingsplatsen?')) { state.pickups.splice(+t.dataset.del, 1); save(); render(); } }
+        else if (t.dataset.rm !== undefined) { const [i, j] = t.dataset.rm.split(':').map(Number); state.pickups[i].people.splice(j, 1); save(); render(); }
+        else if (t.dataset.add !== undefined) {
+            const i = +t.dataset.add, inp = document.querySelector(`[data-name="${i}"]`), name = inp.value.trim();
+            if (name) { state.pickups[i].people.push(name); save(); render(); }
+        }
+    };
+
+    $('share').onclick = async () => {
+        const lines = ['🧺 Picknick – ' + DEST];
+        if (state.date) lines.push('📅 ' + state.date + (state.arrive ? ' kl. ' + state.arrive : ''));
+        lines.push('📍 ' + mapUrl(DEST), '');
+        [...state.pickups].sort((a, b) => a.time.localeCompare(b.time)).forEach(p => {
+            lines.push(`🚗 ${p.time} ${p.place} – ${p.driver} (${p.seats - p.people.length} lediga)` + (p.people.length ? ': ' + p.people.join(', ') : ''));
+        });
+        const text = lines.join('\n');
+        try {
+            if (navigator.share) await navigator.share({ text });
+            else { await navigator.clipboard.writeText(text); $('toast').textContent = 'Kopierat! Klistra in i chatten.'; }
+        } catch (e) {}
+    };
+
+    render();
+</script>
+</body>
+</html>
