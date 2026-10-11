@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Picknick">
+    <meta name="apple-mobile-web-app-title" content="Picnic">
     <meta name="theme-color" content="#0b0e14">
-    <title>🧺 Picknick Västra Farlunda</title>
+    <title>🧺 Picnic Västra Farlunda</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #0b0e14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
@@ -47,36 +47,36 @@
 </head>
 <body>
 <div class="app">
-    <h1>🧺 <span>Picknick</span></h1>
-    <p class="sub">Samlingsplatser &amp; samåkning</p>
+    <h1>🧺 <span>Picnic</span></h1>
+    <p class="sub">Pickup points &amp; carpooling</p>
 
     <div class="card">
-        <div class="label">Mål</div>
+        <div class="label">Destination</div>
         <div class="dest">Västra Farlunda, Skövde</div>
         <div class="row">
-            <div class="group"><label>Datum</label><input id="date" type="date"></div>
-            <div class="group"><label>Vi ses där kl.</label><input id="arrive" type="time"></div>
+            <div class="group"><label>Date</label><input id="date" type="date"></div>
+            <div class="group"><label>Meet there at</label><input id="arrive" type="time"></div>
         </div>
-        <a class="link" id="destMap" target="_blank" rel="noopener">📍 Öppna målet i kartor</a>
+        <a class="link" id="destMap" target="_blank" rel="noopener">📍 Open destination in maps</a>
     </div>
 
-    <h2>Lägg till samlingsplats</h2>
+    <h2>Add pickup point</h2>
     <form class="form" id="form">
         <div class="row">
-            <div class="group"><label>Plats</label><input id="place" placeholder="T.ex. Resecentrum" required></div>
-            <div class="group"><label>Tid</label><input id="time" type="time" required></div>
+            <div class="group"><label>Place</label><input id="place" placeholder="E.g. Central Station" required></div>
+            <div class="group"><label>Time</label><input id="time" type="time" required></div>
         </div>
         <div class="row">
-            <div class="group"><label>Förare</label><input id="driver" placeholder="Namn" required></div>
-            <div class="group"><label>Lediga platser</label><input id="seats" type="number" min="0" max="8" value="3" inputmode="numeric"></div>
+            <div class="group"><label>Driver</label><input id="driver" placeholder="Name" required></div>
+            <div class="group"><label>Free seats</label><input id="seats" type="number" min="0" max="8" value="3" inputmode="numeric"></div>
         </div>
-        <button class="btn full" type="submit">Lägg till</button>
+        <button class="btn full" type="submit">Add</button>
     </form>
 
-    <h2>Samlingsplatser</h2>
+    <h2>Pickup points</h2>
     <div id="list"></div>
 
-    <button class="btn full" id="share">📤 Dela med gruppen</button>
+    <button class="btn full" id="share">📤 Share with the group</button>
     <div class="toast" id="toast"></div>
 </div>
 
@@ -99,20 +99,20 @@
 
     function render() {
         const list = $('list');
-        if (!state.pickups.length) { list.innerHTML = '<div class="empty">Inga samlingsplatser än</div>'; return; }
+        if (!state.pickups.length) { list.innerHTML = '<div class="empty">No pickup points yet</div>'; return; }
         const sorted = state.pickups.map((p, i) => ({ p, i })).sort((a, b) => a.p.time.localeCompare(b.p.time));
         list.innerHTML = sorted.map(({ p, i }) => {
             const left = p.seats - p.people.length;
             return `<div class="pickup">
                 <div class="pickup-top">
                     <div><div class="name">${esc(p.place)}</div>
-                    <div class="meta">🚗 ${esc(p.driver)} · <a class="link" target="_blank" rel="noopener" href="${mapUrl(p.place + ' Skövde')}">karta</a></div></div>
+                    <div class="meta">🚗 ${esc(p.driver)} · <a class="link" target="_blank" rel="noopener" href="${mapUrl(p.place + ' Skövde')}">map</a></div></div>
                     <div><div class="time">${esc(p.time)}</div></div>
-                    <button class="del" data-del="${i}" aria-label="Ta bort">✕</button>
+                    <button class="del" data-del="${i}" aria-label="Remove">✕</button>
                 </div>
-                <div class="seats ${left <= 0 ? 'full' : ''}">${left > 0 ? left + ' lediga platser' : 'Bilen är full'}</div>
-                <div class="people">${p.people.map((n, j) => `<button class="chip" data-rm="${i}:${j}" title="Ta bort">${esc(n)} ✕</button>`).join('')}</div>
-                ${left > 0 ? `<div class="actions"><input data-name="${i}" placeholder="Namn på passagerare"><button class="btn ghost" data-add="${i}">Boka plats</button></div>` : ''}
+                <div class="seats ${left <= 0 ? 'full' : ''}">${left > 0 ? left + ' free seats' : 'Car is full'}</div>
+                <div class="people">${p.people.map((n, j) => `<button class="chip" data-rm="${i}:${j}" title="Remove">${esc(n)} ✕</button>`).join('')}</div>
+                ${left > 0 ? `<div class="actions"><input data-name="${i}" placeholder="Passenger name"><button class="btn ghost" data-add="${i}">Book seat</button></div>` : ''}
             </div>`;
         }).join('');
     }
@@ -128,7 +128,7 @@
 
     $('list').onclick = e => {
         const t = e.target;
-        if (t.dataset.del !== undefined) { if (confirm('Ta bort samlingsplatsen?')) { state.pickups.splice(+t.dataset.del, 1); save(); render(); } }
+        if (t.dataset.del !== undefined) { if (confirm('Remove this pickup point?')) { state.pickups.splice(+t.dataset.del, 1); save(); render(); } }
         else if (t.dataset.rm !== undefined) { const [i, j] = t.dataset.rm.split(':').map(Number); state.pickups[i].people.splice(j, 1); save(); render(); }
         else if (t.dataset.add !== undefined) {
             const i = +t.dataset.add, inp = document.querySelector(`[data-name="${i}"]`), name = inp.value.trim();
@@ -137,16 +137,16 @@
     };
 
     $('share').onclick = async () => {
-        const lines = ['🧺 Picknick – ' + DEST];
-        if (state.date) lines.push('📅 ' + state.date + (state.arrive ? ' kl. ' + state.arrive : ''));
+        const lines = ['🧺 Picnic – ' + DEST];
+        if (state.date) lines.push('📅 ' + state.date + (state.arrive ? ' at ' + state.arrive : ''));
         lines.push('📍 ' + mapUrl(DEST), '');
         [...state.pickups].sort((a, b) => a.time.localeCompare(b.time)).forEach(p => {
-            lines.push(`🚗 ${p.time} ${p.place} – ${p.driver} (${p.seats - p.people.length} lediga)` + (p.people.length ? ': ' + p.people.join(', ') : ''));
+            lines.push(`🚗 ${p.time} ${p.place} – ${p.driver} (${p.seats - p.people.length} free)` + (p.people.length ? ': ' + p.people.join(', ') : ''));
         });
         const text = lines.join('\n');
         try {
             if (navigator.share) await navigator.share({ text });
-            else { await navigator.clipboard.writeText(text); $('toast').textContent = 'Kopierat! Klistra in i chatten.'; }
+            else { await navigator.clipboard.writeText(text); $('toast').textContent = 'Copied! Paste it into the chat.'; }
         } catch (e) {}
     };
 
